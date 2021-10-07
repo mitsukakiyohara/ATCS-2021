@@ -1,5 +1,6 @@
 names = ["grace", "alex", "charlotte", "jhila", "marvin"]
 
+#using while loops
 while(len(names) > 3): 
     print("the room is crowded")
     names.pop()
@@ -11,8 +12,10 @@ else:
 #   if len(names) > 3: 
 #       print("the room is crowded")
 #       names.pop()
-#   else: 
-#       print("the room is not very crowded")
+#       names.pop()
+#   
+#   if len(names) > 3: 
+#       print("the room is crowded")     
 
 
 
