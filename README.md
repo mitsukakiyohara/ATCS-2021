@@ -1,4 +1,6 @@
 # ATCS-2021
-hello my name is mitsuka. 
-this is my ATCS repository from 2021-2022 (B block). 
-go seniors! 💛
+ATCS repository from 2021-2022 (B Block). 
+## Project completed: 
+### 1. US Elections 2020 
+A data visualization project using Kaggle's US Election 2020 dataset. 
+
