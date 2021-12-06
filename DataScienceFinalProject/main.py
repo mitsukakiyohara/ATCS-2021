@@ -235,7 +235,7 @@ figtrump = px.scatter(test_trump, x="created_at", # date on the x axis
 figbiden = px.scatter(test_biden, x="created_at", # date on the x axis
                y="polarity", # sentiment on the y axis
                hover_data=["country", "user_name"], # data to show on hover
-               color_discrete_sequence=["indianred", "lightseagreen", "mediumpurple"], # colors to use
+               color_discrete_sequence=["lightseagreen", "indianred", "mediumpurple"], # colors to use
                color="sentiment", # represent each sentiment as different color
                size="subjectivity", # the more votes, the bigger the circle
                size_max=10, # not too big (cap size)
@@ -244,7 +244,7 @@ figbiden = px.scatter(test_biden, x="created_at", # date on the x axis
           )
 #figbiden.show()
 
-#Data visualization: 
+#Data visualization: Daily Tweet Count over Time 
 
 #For datetime graph purposes, change datetimes to year-month-date format
 test_trump['created_at_ymd'] = test_trump['created_at_time'].dt.strftime('%Y-%m-%d')
