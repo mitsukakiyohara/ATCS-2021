@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 # Import the data
-df = pd.read_csv("../data/oldFaithful.csv")
+df = pd.read_csv("oldFaithful.csv")
 
 # Set values for x and y
 x = df["wait_time"]
