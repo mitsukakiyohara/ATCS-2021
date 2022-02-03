@@ -5,6 +5,6 @@ ATCS repository from 2021-2022 (B Block).
 A data visualization project using Kaggle's US Election 2020 dataset. 
 Link to dataset: https://www.kaggle.com/manchunhui/us-election-2020-tweets
 
-### 2. Binary Tree 
-Binary tree and tree traversals
+### 2. MazeBot
+An AI that uses finite state machines to solve a maze
 
