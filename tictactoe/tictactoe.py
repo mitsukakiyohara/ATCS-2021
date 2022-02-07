@@ -11,7 +11,6 @@ class TicTacToe:
         print("Player 1 is X and Player 2 is 0")
         print("Take turns placing your pieces - the first to 3 in a row wins!")
 
-
     def print_board(self):
         # TODO: Print the board
         print()
@@ -19,7 +18,6 @@ class TicTacToe:
         for i in range(len(self.board)):
             print(str(i), end="  ")
             print('  '.join(self.board[i]))
-
 
     def is_valid_move(self, row, col):
         # TODO: Check if the move is valid
@@ -40,16 +38,31 @@ class TicTacToe:
     def take_manual_turn(self, player):
         # TODO: Ask the user for a row, col until a valid response
         #  is given them place the player's icon in the right spot
-        row = int(input("Enter a row: "))
-        col = int(input("Enter a col: "))
 
-        while not self.is_valid_move(row, col):
-            print("Please enter a valid move.")
+        if player == "O":
+            row, col = self.take_random_turn(player)
+        # if player == "X"
+        else:
             row = int(input("Enter a row: "))
             col = int(input("Enter a col: "))
 
+            while not self.is_valid_move(row, col):
+                print("Please enter a valid move.")
+                row = int(input("Enter a row: "))
+                col = int(input("Enter a col: "))
+
         self.place_player(player, row, col)
         return self.print_board()
+
+    def take_random_turn(self, player):
+        row = random.randint(0, 2)
+        col = random.randint(0, 2)
+
+        while not self.is_valid_move(row, col):
+            row = random.randint(0, 2)
+            col = random.randint(0, 2)
+
+        return row, col
 
     def take_turn(self, player):
         # TODO: Simply call the take_manual_turn function
