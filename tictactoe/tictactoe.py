@@ -64,10 +64,20 @@ class TicTacToe:
 
         return row, col
 
+    def take_minimax_turn(self, player):
+        score, row, col = self.minimax(player)
+        print("minimax score:", score)
+
+        self.place_player(player, row, col)
+        return self.print_board()
+
     def take_turn(self, player):
         # TODO: Simply call the take_manual_turn function
         print(player + "'s Turn")
-        return self.take_manual_turn(player)
+        if player == "O":
+            return self.take_minimax_turn(player)
+        else:
+            return self.take_manual_turn(player)
 
     def check_col_win(self, player):
         # TODO: Check col win
@@ -114,6 +124,47 @@ class TicTacToe:
                 if self.board[i][j] == '-':
                     return False
         return True
+
+    def minimax(self, player):
+        opt_row = -1
+        opt_col = 1
+
+        # base cases
+        if self.check_win("O"):
+            return 10, None, None
+        elif self.check_tie():
+            return 0, None, None
+        elif self.check_win("X"):
+            return -10, None, None
+
+        if player == "O":
+            best = -10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.minimax("X")[0]
+                        if best < score:
+                            best = score
+                            opt_row = i
+                            opt_col = j
+                        self.place_player("-", i, j)
+            return best, opt_row, opt_col
+
+        if player == "X":
+            worst = 10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.minimax("O")[0]
+                        if worst > score:
+                            worst = score
+                            opt_row = i
+                            opt_col = j
+                        self.place_player("-", i, j)
+            return worst, opt_row, opt_col
+
 
     def play_game(self):
         # TODO: Play game
