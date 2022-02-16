@@ -1,5 +1,5 @@
 import random
-
+import time
 
 class TicTacToe:
     def __init__(self):
@@ -68,9 +68,15 @@ class TicTacToe:
     # player uses minimax to place icon
     # also returns minimax score
     def take_minimax_turn(self, player):
-        max_depth = 2
-        score, row, col = self.depth_minimax(player, max_depth)
-        # print("minimax score:", score)
+        # initial values
+        max_depth = 100
+        alpha = -1000
+        beta = 1000
+
+        start = time.time()
+        score, row, col = self.minimax_alpha_beta(player, max_depth, alpha, beta)
+        end = time.time()
+        print("This turn took:", end - start, "seconds")
 
         self.place_player(player, row, col)
         return self.print_board()
@@ -133,7 +139,7 @@ class TicTacToe:
         return (not self.check_win("O") and not self.check_win("X")) and tied
 
     # let computer be player O
-    # performs minimax and returns tuple (score, row col)
+    # performs minimax and returns tuple (score, row, col)
     def minimax(self, player):
         opt_row = -1
         opt_col = -1
@@ -177,7 +183,7 @@ class TicTacToe:
             return worst, opt_row, opt_col
 
     # let computer be player O
-    # performs depth-limited minimax search and returns tuple (score, row col)
+    # performs depth-limited minimax search and returns tuple (score, row, col)
     # depth = # of edges from root to given node
     def depth_minimax(self, player, depth):
         opt_row = -1
@@ -219,6 +225,61 @@ class TicTacToe:
                             opt_row = i
                             opt_col = j
                         self.board[i][j] = "-"
+            return worst, opt_row, opt_col
+
+    # alpha-beta pruning with minimax
+    def minimax_alpha_beta(self, player, depth, alpha, beta):
+        opt_row = -1
+        opt_col = -1
+
+        # base cases
+        if self.check_win("O"):
+            return 10, None, None
+        elif self.check_win("X"):
+            return -10, None, None
+        elif self.check_tie():
+            return 0, None, None
+        elif depth == 0:
+            return 0, None, None
+
+        # maximize
+        if player == "O":
+            best = -10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.minimax_alpha_beta("X", depth - 1, alpha, beta)[0]
+                        alpha = max(alpha, score)
+                        # prune neighboring branch
+                        if best < score:
+                            best = score
+                            opt_row = i
+                            opt_col = j
+
+                        self.board[i][j] = "-"
+                        if alpha >= beta:
+                            break
+            return best, opt_row, opt_col
+
+        # minimize
+        if player == "X":
+            worst = 10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.minimax_alpha_beta("O", depth - 1, alpha, beta)[0]
+                        beta = min(score, beta)
+                        # prune neighboring branch
+                        if worst > score:
+                            worst = score
+                            opt_row = i
+                            opt_col = j
+
+                        self.board[i][j] = "-"
+                        if alpha >= beta:
+                            break
             return worst, opt_row, opt_col
 
     def play_game(self):
