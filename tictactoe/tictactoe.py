@@ -1,26 +1,27 @@
 import random
 
+
 class TicTacToe:
     def __init__(self):
-        # TODO: Set up the board to be '-'
+        # set up board
         self.board = [['-', '-', '-'], ['-', '-', '-'], ['-', '-', '-']]
 
+    # prints instructions to the game
     def print_instructions(self):
-        # TODO: Print the instructions to the game
         print("Welcome to TicTacToe!")
         print("Player 1 is X and Player 2 is 0")
         print("Take turns placing your pieces - the first to 3 in a row wins!")
 
+    # print board
     def print_board(self):
-        # TODO: Print the board
         print()
         print("   0  1  2")
         for i in range(len(self.board)):
             print(str(i), end="  ")
             print('  '.join(self.board[i]))
 
+    # check if move is valid
     def is_valid_move(self, row, col):
-        # TODO: Check if the move is valid
         if row < 0 or row > 2:
             return False
         elif col < 0 or col > 2:
@@ -30,17 +31,16 @@ class TicTacToe:
 
         return True
 
+    # place player on board
     def place_player(self, player, row, col):
-        # TODO: Place the player on the board
         self.board[row][col] = player
         return self.board
 
+    # ask user for valid row, col
+    # places player's icon in correct spot
     def take_manual_turn(self, player):
-        # TODO: Ask the user for a row, col until a valid response
-        #  is given them place the player's icon in the right spot
-
         if player == "O":
-            row, col = self.take_random_turn(player)
+            row, col = self.take_random_turn()
         # if player == "X"
         else:
             row = int(input("Enter a row: "))
@@ -54,7 +54,8 @@ class TicTacToe:
         self.place_player(player, row, col)
         return self.print_board()
 
-    def take_random_turn(self, player):
+    # computer chooses a random row, col to place icon
+    def take_random_turn(self):
         row = random.randint(0, 2)
         col = random.randint(0, 2)
 
@@ -64,23 +65,26 @@ class TicTacToe:
 
         return row, col
 
+    # player uses minimax to place icon
+    # also returns minimax score
     def take_minimax_turn(self, player):
-        score, row, col = self.minimax(player)
-        print("minimax score:", score)
+        max_depth = 2
+        score, row, col = self.depth_minimax(player, max_depth)
+        # print("minimax score:", score)
 
         self.place_player(player, row, col)
         return self.print_board()
 
+    # calls function take_manual_turn()
     def take_turn(self, player):
-        # TODO: Simply call the take_manual_turn function
         print(player + "'s Turn")
         if player == "O":
             return self.take_minimax_turn(player)
         else:
             return self.take_manual_turn(player)
 
+    # check column win
     def check_col_win(self, player):
-        # TODO: Check col win
         if self.board[0][0] == self.board[1][0] == self.board[2][0] == player:
             return True
         elif self.board[0][1] == self.board[1][1] == self.board[2][1] == player:
@@ -90,8 +94,8 @@ class TicTacToe:
 
         return False
 
+    # check row win
     def check_row_win(self, player):
-        # TODO: Check row win
         if self.board[0][0] == self.board[0][1] == self.board[0][2] == player:
             return True
         elif self.board[1][0] == self.board[1][1] == self.board[1][2] == player:
@@ -101,8 +105,8 @@ class TicTacToe:
 
         return False
 
+    # check diagonal win
     def check_diag_win(self, player):
-        # TODO: Check diagonal win
         if self.board[0][0] == self.board[1][1] == self.board[2][2] == player:
             return True
         if self.board[0][2] == self.board[1][1] == self.board[2][0] == player:
@@ -110,33 +114,39 @@ class TicTacToe:
 
         return False
 
+    # check wins
     def check_win(self, player):
-        # TODO: Check win
         if self.check_col_win(player) or self.check_row_win(player) or self.check_diag_win(player) is True:
             return True
 
         return False
 
+    # check ties
     def check_tie(self):
-        # TODO: Check tie
+        tied = True
         for i in range(len(self.board)):
             for j in range(len(self.board)):
                 if self.board[i][j] == '-':
-                    return False
-        return True
+                    tied = False
+                    break
 
+        return (not self.check_win("O") and not self.check_win("X")) and tied
+
+    # let computer be player O
+    # performs minimax and returns tuple (score, row col)
     def minimax(self, player):
         opt_row = -1
-        opt_col = 1
+        opt_col = -1
 
         # base cases
         if self.check_win("O"):
             return 10, None, None
-        elif self.check_tie():
-            return 0, None, None
         elif self.check_win("X"):
             return -10, None, None
+        elif self.check_tie():
+            return 0, None, None
 
+        # maximize player O's score
         if player == "O":
             best = -10
             for i in range(len(self.board)):
@@ -148,9 +158,10 @@ class TicTacToe:
                             best = score
                             opt_row = i
                             opt_col = j
-                        self.place_player("-", i, j)
+                        self.board[i][j] = "-"
             return best, opt_row, opt_col
 
+        # minimize player X's score
         if player == "X":
             worst = 10
             for i in range(len(self.board)):
@@ -162,9 +173,53 @@ class TicTacToe:
                             worst = score
                             opt_row = i
                             opt_col = j
-                        self.place_player("-", i, j)
+                        self.board[i][j] = "-"
             return worst, opt_row, opt_col
 
+    # let computer be player O
+    # performs depth-limited minimax search and returns tuple (score, row col)
+    # depth = # of edges from root to given node
+    def depth_minimax(self, player, depth):
+        opt_row = -1
+        opt_col = -1
+
+        # base cases
+        if self.check_win("O"):
+            return 10, None, None
+        elif self.check_win("X"):
+            return -10, None, None
+        elif self.check_tie():
+            return 0, None, None
+        elif depth == 0:
+            return 0, None, None
+
+        if player == "O":
+            best = -10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.depth_minimax("X", depth - 1)[0]
+                        if best < score:
+                            best = score
+                            opt_row = i
+                            opt_col = j
+                        self.board[i][j] = "-"
+            return best, opt_row, opt_col
+
+        if player == "X":
+            worst = 10
+            for i in range(len(self.board)):
+                for j in range(len(self.board)):
+                    if self.is_valid_move(i, j):
+                        self.place_player(player, i, j)
+                        score = self.depth_minimax("O", depth - 1)[0]
+                        if worst > score:
+                            worst = score
+                            opt_row = i
+                            opt_col = j
+                        self.board[i][j] = "-"
+            return worst, opt_row, opt_col
 
     def play_game(self):
         # TODO: Play game
@@ -190,9 +245,3 @@ class TicTacToe:
             if self.check_tie():
                 print("The game ends in a tie!")
                 return False
-
-
-
-
-
-
