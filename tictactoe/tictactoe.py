@@ -74,7 +74,8 @@ class TicTacToe:
         beta = 1000
 
         start = time.time()
-        score, row, col = self.minimax_alpha_beta(player, max_depth, alpha, beta)
+        # score, row, col = self.minimax_alpha_beta(player, max_depth, alpha, beta)
+        score, row, col = self.depth_minimax(player, max_depth)
         end = time.time()
         print("This turn took:", end - start, "seconds")
 
@@ -281,6 +282,10 @@ class TicTacToe:
                         if alpha >= beta:
                             break
             return worst, opt_row, opt_col
+
+    # def test_alpha_beta(self, board, player, depth, test_name = "Test"):
+    #     t = TicTacToe("X", "O")
+    #     t.board = board
 
     def play_game(self):
         # TODO: Play game
