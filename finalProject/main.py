@@ -32,9 +32,9 @@ pca.fit(X)
 plt.figure(1, figsize=(12,8))
 plt.plot(pca.explained_variance_, linewidth=2)
 
-plt.xlabel('Components')
+plt.xlabel('n_components')
 plt.ylabel('Explained Variances')
-plt.title('The Elbow Method Showing the Optimal Component')
+plt.title('Variance vs. Components') 
 plt.show()
 
 ''' Split data and target into random test and train subsets '''
@@ -42,18 +42,231 @@ plt.show()
 
 X_train, X_test, y_train, y_test = train_test_split(X, target, test_size=0.1, stratify=target, random_state=0)
 
-n_components = 90 
-pca = PCA(n_components=n_components, whiten=True)
-pca.fit(X_train)
+n_components = 70
+pca = PCA(n_components=n_components, whiten=True).fit(X_train)
 
+X_train_pca = pca.transform(X_train)
+X_test_pca = pca.transform(X_test)
+
+''' Plot the average face from all of the samples '''
 fig, axs = plt.subplots(nrows=1, ncols=1, figsize=(8,8))
 axs.imshow(pca.mean_.reshape((64, 64)), cmap="gray")
 axs.set_xticks([])
 axs.set_yticks([])
 axs.set_title('Average Face')
 
+''' Testing Different ML Models '''
+# Store accuracies on the machine learning methods for comparison at the end 
+model_names = []
+model_accuracies = []
 
+model_names_pca = []
+model_accuracies_pca = []
 
-                        
-        
+''' Logistic Regression '''
+# WITHOUT PCA
+lr = LogisticRegression().fit(X_train, y_train)
+
+lr_accuracy = round(lr.score(X_test, y_test) * 100, 2)
+
+print("lr_accuracy is %", lr_accuracy)
+
+model_names.append("Logistic Regression")
+model_accuracies.append(lr_accuracy)
+y_pred = lr.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# USING PCA 
+lr = LogisticRegression().fit(X_train_pca, y_train)
+
+lr_accuracy_pca = round(lr.score(X_test_pca, y_test) * 100, 2)
+
+print("lr_accuracy is %", lr_accuracy_pca)
+
+model_names_pca.append("Logistic Regression")
+model_accuracies_pca.append(lr_accuracy_pca)
+y_pred = lr.predict(X_test_pca)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+''' Random Forest Classifier '''
+# WITHOUT PCA
+rf = RandomForestClassifier(n_estimators=400, random_state=1).fit(X_train, y_train)
+# Note that n_estimators is chosen at random. While it is generally assumed that larger
+# the number of trees, the better, the optimal number of estimators or trees will be found
+# via GridSearch
+
+rf_accuracy = round(rf.score(X_test, y_test) * 100, 2)
+
+print("rf_accuracy is %", rf_accuracy)
+
+model_names.append("Random Forest")
+model_accuracies.append(rf_accuracy)
+y_pred = rf.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# USING PCA 
+rf = RandomForestClassifier(n_estimators=400, random_state=1).fit(X_train_pca, y_train)
+# Note that n_estimators is chosen at random. While it is generally assumed that larger
+# the number of trees, the better, the optimal number of estimators or trees will be found
+# via GridSearch
+
+rf_accuracy_pca = round(rf.score(X_test_pca, y_test) * 100, 2)
+
+print("rf_accuracy is %", rf_accuracy_pca)
+
+model_names_pca.append("Random Forest")
+model_accuracies_pca.append(rf_accuracy_pca)
+y_pred = rf.predict(X_test_pca)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+''' KNN (K-Nearest Neighbors) '''
+# WITHOUT PCA
+knn = KNeighborsClassifier(n_neighbors=2).fit(X_train, y_train)
+
+knn_accuracy = round(knn.score(X_test, y_test) * 100, 2)
+
+print("knn_accuracy is %", knn_accuracy)
+
+model_names.append("KNN")
+model_accuracies.append(knn_accuracy)
+y_pred = knn.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# USING PCA 
+knn = KNeighborsClassifier(n_neighbors=2).fit(X_train_pca, y_train)
+
+knn_accuracy_pca = round(knn.score(X_test_pca, y_test) * 100, 2)
+
+print("knn_accuracy is %", knn_accuracy_pca)
+
+model_names_pca.append("KNN")
+model_accuracies_pca.append(knn_accuracy_pca)
+y_pred = knn.predict(X_test_pca)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+''' SVM (Support Vector Machines) '''
+# WITHOUT PCA
+svm = SVC(kernel='linear', random_state=0).fit(X_train, y_train)
+
+svm_accuracy = round(svm.score(X_test, y_test) * 100, 2)
+
+print("svm_accuracy is %", svm_accuracy)
+
+model_names.append("SVM")
+model_accuracies.append(svm_accuracy)
+y_pred = svm.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# USING PCA
+svm = SVC(kernel='linear', random_state=0).fit(X_train_pca, y_train)
+
+svm_accuracy_pca = round(svm.score(X_test_pca, y_test) * 100, 2)
+
+print("svm_accuracy is %", svm_accuracy_pca)
+
+model_names_pca.append("SVM")
+model_accuracies_pca.append(svm_accuracy_pca)
+y_pred = svm.predict(X_test_pca)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+''' Naive Bayes '''
+# WITHOUT PCA
+nb = GaussianNB().fit(X_train, y_train)
+
+nb_accuracy = round(nb.score(X_test, y_test) * 100, 2)
+
+print("nb_accuracy is %", nb_accuracy)
+
+model_names.append("Naive Bayes")
+model_accuracies.append(nb_accuracy)
+y_pred = nb.predict(X_test)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+# USING PCA
+nb = GaussianNB().fit(X_train_pca, y_train)
+
+nb_accuracy_pca = round(nb.score(X_test_pca, y_test) * 100, 2)
+
+print("nb_accuracy is %", nb_accuracy_pca)
+
+model_names_pca.append("Naive Bayes")
+model_accuracies_pca.append(nb_accuracy_pca)
+y_pred = nb.predict(X_test_pca)
+
+cm = confusion_matrix(y_test, y_pred)
+print("Confusion Matrix:")
+print(cm)
+
+''' Comparing Accuracies of Different ML Models '''
+# Without PCA 
+# Credits: Oanh Doan 
+df = pd.DataFrame({'Method': model_names, 'Accuracy (%)': model_accuracies})
+# df = df.sort_values(by=['Accuracy (%)'])
+df = df.reset_index(drop=True)
+df.head()
+
+# With PCA 
+df_pca = pd.DataFrame({'Method': model_names_pca, 'Accuracy (%)': model_accuracies_pca})
+# df = df.sort_values(by=['Accuracy (%)'])
+df_pca = df_pca.reset_index(drop=True)
+df_pca.head()
+
+''' Cross Validation: K-Fold '''
+models=[]
+models.append(LogisticRegression())
+models.append(RandomForestClassifier(n_estimators=400))
+models.append(KNeighborsClassifier(n_neighbors=2))
+models.append(SVC())
+models.append(GaussianNB())
+
+# Convergence warning for logistic regression - increase size of dataset, increase num of iterations, or scale data
+# WITHOUT PCA
+model_cv_scores = []
+for model in models: 
+    kfold = KFold(n_splits=5, shuffle=True, random_state=0)
+    cv_scores = cross_val_score(model, X_train, y_train, cv=kfold)
     
+    # print("{} mean cross validation scores: :{:.2f}".format(name, cv_scores.mean()))
+    model_cv_scores.append(round(cv_scores.mean() * 100, 2))
+
+df['CV Score (%)'] = model_cv_scores
+# df
+
+# WITH PCA
+model_cv_scores_pca = []
+for model in models: 
+    kfold = KFold(n_splits=5, shuffle=True, random_state=0)
+    cv_scores_pca = cross_val_score(model, X_train_pca, y_train, cv=kfold)
+    
+    # print("{} mean cross validation scores: :{:.2f}".format(name, cv_scores.mean()))
+    model_cv_scores_pca.append(round(cv_scores_pca.mean() * 100, 2))
+
+df_pca['CV Score (%)'] = model_cv_scores_pca
+# df_pca
