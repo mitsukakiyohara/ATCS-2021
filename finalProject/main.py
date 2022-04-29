@@ -270,3 +270,61 @@ for model in models:
 
 df_pca['CV Score (%)'] = model_cv_scores_pca
 # df_pca
+
+'''Hyperparameter Tuning: GridSearchCV'''
+# Credits: Satyam Kumar
+# Create the Pipeline 
+pipeline = Pipeline([('classifier', models[1])])
+# Create a list of parameter dictionaries 
+params = [param0, param1, param2, param3, param4]
+
+
+# Initialize the hyperparameters for each dictionary 
+# Comment out parameter values that I won't be using 
+param0 = {}
+
+# values for classifier__C: 10**-2, 10**-1, 10**0, 10**1, 10**2
+param0['classifier__C'] = [10**-2, 10**-1, 10**0, 10**1, 10**2]
+
+param0['classifier__penalty'] = ['l1', 'l2']
+
+# values for classifier__class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
+param0['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+param0['classifier'] = [models[0]]
+
+param1 = {}
+param1['classifier__max_depth'] = [5, 10, 20]
+
+# values for classifier__class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
+param1['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+param1['classifier'] = [models[1]]
+
+param2 = {}
+
+# values for classifier__n_neighbors: 2,5,10,25,50
+param2['classifier__n_neighbors'] = [2,5,10,25,50]
+param2['classifier'] = [models[2]]
+
+param3 = {}
+# values for classifier__C: 10**-2, 10**-1, 10**0, 10**1, 10**2
+param3['classifier__C'] = [10**-2, 10**-1, 10**0, 10**1, 10**2]
+param3['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+param3['classifier'] = [models[3]]
+
+param4 = {}
+param4['classifier__alpha'] = [10**0, 10**1, 10**2]
+param4['classifier'] = [models[4]]
+
+# Train the grid search model by searchinbg every parameter combination within each dictionary
+gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)
+
+# Best performing model and its corresponding hyperparameters
+gs.best_params_
+
+# ROC-AUC score for the best model
+gs.best_score_
+
+# Test data performance
+print("Precision:",precision_score(rs.predict(X_test), y_test))
+print("Recall:",recall_score(rs.predict(X_test), y_test))
+print("ROC AUC Score:",roc_auc_score(rs.predict(X_test), y_test))
