@@ -1,5 +1,5 @@
 """
-Facial Regonition Program with Olivetti Dataset
+Facial Regonition Program with Olivetti Dataset (with Cross Validation and Hyperparameter tuning) 
 Name: Mitsuka Kiyohara
 Date: 4/21/22 
 Block: B 
@@ -9,10 +9,20 @@ Block: B
 ''' Import Libraries '''
 import numpy as np 
 import pandas as pd 
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
 
 import matplotlib.pyplot as plt 
+import seaborn as sns
+
+from sklearn.decomposition import PCA 
+from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
+from sklearn.linear_model import LogisticRegression
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.svm import SVC
+from sklearn.naive_bayes import GaussianNB
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, roc_auc_score
+from sklearn.pipeline import Pipeline
+
 
 ''' Load Data '''
 data = np.load("olivetti_faces.npy")
@@ -24,7 +34,6 @@ num_samples = data.shape[0]
 image_size = data.shape[1] * data.shape[2] # 64 by 64
 X = data.reshape((num_samples, image_size))
 
-# print("X.shape = " + str(X.shape))
 
 # Find optimum number of principle component (n_component)
 pca = PCA()
@@ -32,6 +41,7 @@ pca.fit(X)
 plt.figure(1, figsize=(12,8))
 plt.plot(pca.explained_variance_, linewidth=2)
 
+# Decide most optimal PCA component size from graph
 plt.xlabel('n_components')
 plt.ylabel('Explained Variances')
 plt.title('Variance vs. Components') 
@@ -39,10 +49,9 @@ plt.show()
 
 ''' Split data and target into random test and train subsets '''
 # We will be splitting it 9:1 (90% for training, 10% for testing)
-
 X_train, X_test, y_train, y_test = train_test_split(X, target, test_size=0.1, stratify=target, random_state=0)
 
-n_components = 70
+n_components = 70 
 pca = PCA(n_components=n_components, whiten=True).fit(X_train)
 
 X_train_pca = pca.transform(X_train)
@@ -79,7 +88,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# USING PCA 
+# WITH PCA 
 lr = LogisticRegression().fit(X_train_pca, y_train)
 
 lr_accuracy_pca = round(lr.score(X_test_pca, y_test) * 100, 2)
@@ -113,7 +122,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# USING PCA 
+# WITH PCA 
 rf = RandomForestClassifier(n_estimators=400, random_state=1).fit(X_train_pca, y_train)
 # Note that n_estimators is chosen at random. While it is generally assumed that larger
 # the number of trees, the better, the optimal number of estimators or trees will be found
@@ -147,7 +156,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# USING PCA 
+# WITH PCA 
 knn = KNeighborsClassifier(n_neighbors=2).fit(X_train_pca, y_train)
 
 knn_accuracy_pca = round(knn.score(X_test_pca, y_test) * 100, 2)
@@ -178,7 +187,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# USING PCA
+# WITH PCA
 svm = SVC(kernel='linear', random_state=0).fit(X_train_pca, y_train)
 
 svm_accuracy_pca = round(svm.score(X_test_pca, y_test) * 100, 2)
@@ -209,7 +218,7 @@ cm = confusion_matrix(y_test, y_pred)
 print("Confusion Matrix:")
 print(cm)
 
-# USING PCA
+# WITH PCA
 nb = GaussianNB().fit(X_train_pca, y_train)
 
 nb_accuracy_pca = round(nb.score(X_test_pca, y_test) * 100, 2)
@@ -225,14 +234,14 @@ print("Confusion Matrix:")
 print(cm)
 
 ''' Comparing Accuracies of Different ML Models '''
-# Without PCA 
+# WITHOUT PCA 
 # Credits: Oanh Doan 
 df = pd.DataFrame({'Method': model_names, 'Accuracy (%)': model_accuracies})
 # df = df.sort_values(by=['Accuracy (%)'])
 df = df.reset_index(drop=True)
 df.head()
 
-# With PCA 
+# WITH PCA 
 df_pca = pd.DataFrame({'Method': model_names_pca, 'Accuracy (%)': model_accuracies_pca})
 # df = df.sort_values(by=['Accuracy (%)'])
 df_pca = df_pca.reset_index(drop=True)
@@ -273,11 +282,6 @@ df_pca['CV Score (%)'] = model_cv_scores_pca
 
 '''Hyperparameter Tuning: GridSearchCV'''
 # Credits: Satyam Kumar
-# Create the Pipeline 
-pipeline = Pipeline([('classifier', models[1])])
-# Create a list of parameter dictionaries 
-params = [param0, param1, param2, param3, param4]
-
 
 # Initialize the hyperparameters for each dictionary 
 # Comment out parameter values that I won't be using 
@@ -315,7 +319,13 @@ param4 = {}
 param4['classifier__alpha'] = [10**0, 10**1, 10**2]
 param4['classifier'] = [models[4]]
 
-# Train the grid search model by searchinbg every parameter combination within each dictionary
+# Create the Pipeline 
+pipeline = Pipeline([('classifier', models[1])])
+
+# Create a list of parameter dictionaries 
+params = [param0, param1, param2, param3, param4]
+
+# Train the grid search model by searching every parameter combination within each dictionary
 gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)
 
 # Best performing model and its corresponding hyperparameters
@@ -324,7 +334,13 @@ gs.best_params_
 # ROC-AUC score for the best model
 gs.best_score_
 
-# Test data performance
+# Test performance with hyperparameter tuning 
 print("Precision:",precision_score(rs.predict(X_test), y_test))
 print("Recall:",recall_score(rs.predict(X_test), y_test))
 print("ROC AUC Score:",roc_auc_score(rs.predict(X_test), y_test))
+
+# Using grid search CV for PCA model 
+# gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train_pca, y_train)
+
+
+
