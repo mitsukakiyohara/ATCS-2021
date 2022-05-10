@@ -20,7 +20,7 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.naive_bayes import GaussianNB
-from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, precision_score, recall_score, roc_auc_score
+from sklearn.metrics import confusion_matrix, ConfusionMatrixDisplay, accuracy_score
 from sklearn.pipeline import Pipeline
 
 
@@ -342,5 +342,8 @@ rs = RandomizedSearchCV(models[0], param0, n_iter=100, n_jobs=-1, cv=2, scoring=
 # Best performing model and its corresponding hyperparameters from GridSearchCV (for RandomizedSearchCV, replace gs with rs)
 gs.best_params_
 
-# ROC-AUC score for the best model (for RandomizedSearchCV, replace gs with rs)
+# Mean cross validated score for the best model (for RandomizedSearchCV, replace gs with rs)
 gs.best_score_
+
+# Accuracy using newly found hyperparameters 
+# print(accuracy_score(rgs.predict(y_test, y_pred)))
