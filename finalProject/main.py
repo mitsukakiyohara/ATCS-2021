@@ -1,7 +1,7 @@
 """
 Facial Regonition Program with Olivetti Dataset (with Cross Validation and Hyperparameter tuning) 
 Name: Mitsuka Kiyohara
-Date: 4/21/22 
+Date: 5/10/22 
 Block: B 
 
 """
@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 from sklearn.decomposition import PCA 
-from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV
+from sklearn.model_selection import train_test_split, cross_val_score, KFold, GridSearchCV, RandomizedSearchCV
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.neighbors import KNeighborsClassifier
@@ -33,7 +33,6 @@ target_labels = np.load("olivetti_faces_target.npy")
 num_samples = data.shape[0]
 image_size = data.shape[1] * data.shape[2] # 64 by 64
 X = data.reshape((num_samples, image_size))
-
 
 # Find optimum number of principle component (n_component)
 pca = PCA()
@@ -280,43 +279,46 @@ for model in models:
 df_pca['CV Score (%)'] = model_cv_scores_pca
 # df_pca
 
-'''Hyperparameter Tuning: GridSearchCV'''
+'''Hyperparameter Tuning: GridSearchCV and RandomizedSearchCV'''
 # Credits: Satyam Kumar
 
 # Initialize the hyperparameters for each dictionary 
-# Comment out parameter values that I won't be using 
+# Note: Had to cut down number of values being tested due to processing time. 
+# Commented the full values I would have tested 
+
 param0 = {}
 
-# values for classifier__C: 10**-2, 10**-1, 10**0, 10**1, 10**2
-param0['classifier__C'] = [10**-2, 10**-1, 10**0, 10**1, 10**2]
+# values for C: 10**-2, 10**-1, 10**0, 10**1, 10**2
+param0['C'] = [10**-2, 10**0, 10**2]
+param0['penalty'] = ["none", 'l2']
 
-param0['classifier__penalty'] = ['l1', 'l2']
-
-# values for classifier__class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
-param0['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+# values for class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
+param0['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}]
 param0['classifier'] = [models[0]]
 
 param1 = {}
-param1['classifier__max_depth'] = [5, 10, 20]
+param1['max_depth'] = [5, 10, 20]
 
-# values for classifier__class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
-param1['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+# values for class_weight: None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}
+param1['class_weight'] = [None, {0:1,1:5}, {0:1,1:10}]
 param1['classifier'] = [models[1]]
 
 param2 = {}
 
-# values for classifier__n_neighbors: 2,5,10,25,50
-param2['classifier__n_neighbors'] = [2,5,10,25,50]
+# values for n_neighbors: 2,5,10,25,50
+param2['n_neighbors'] = [5,10,50]
 param2['classifier'] = [models[2]]
 
 param3 = {}
 # values for classifier__C: 10**-2, 10**-1, 10**0, 10**1, 10**2
-param3['classifier__C'] = [10**-2, 10**-1, 10**0, 10**1, 10**2]
-param3['classifier__class_weight'] = [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+param3['C'] = [10**-2, 10**0, 10**2]
+
+# values for classifier__class_weight: [None, {0:1,1:5}, {0:1,1:10}, {0:1,1:25}]
+param3['class_weight'] = [None, {0:1,1:5}, {0:1,1:10}]
 param3['classifier'] = [models[3]]
 
 param4 = {}
-param4['classifier__alpha'] = [10**0, 10**1, 10**2]
+param4['alpha'] = [10**0, 10**1, 10**2]
 param4['classifier'] = [models[4]]
 
 # Create the Pipeline 
@@ -325,22 +327,20 @@ pipeline = Pipeline([('classifier', models[1])])
 # Create a list of parameter dictionaries 
 params = [param0, param1, param2, param3, param4]
 
-# Train the grid search model by searching every parameter combination within each dictionary
-gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)
+# Train the grid search model by searching every parameter combination within each dictionary (PIPELINE SOLUTION)
+# gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)
 
-# Best performing model and its corresponding hyperparameters
-gs.best_params_
-
-# ROC-AUC score for the best model
-gs.best_score_
-
-# Test performance with hyperparameter tuning 
-print("Precision:",precision_score(rs.predict(X_test), y_test))
-print("Recall:",recall_score(rs.predict(X_test), y_test))
-print("ROC AUC Score:",roc_auc_score(rs.predict(X_test), y_test))
-
-# Using grid search CV for PCA model 
+# WITH PCA 
 # gs = GridSearchCV(pipeline, params, cv=3, n_jobs=-1, scoring='roc_auc').fit(X_train_pca, y_train)
 
 
+# Applying GridSearchCV on the Logistic Regression model (JUST ONE MODEL) 
+gs = GridSearchCV(models[0], param0, cv=2, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)                                                      
+# Applying RandomizedSearch CV on the Logistic Regression model (JUST ONE MODEL) 
+rs = RandomizedSearchCV(models[0], param0, n_iter=100, n_jobs=-1, cv=2, scoring='accuracy').fit(X_train, y_train)   
 
+# Best performing model and its corresponding hyperparameters from GridSearchCV (for RandomizedSearchCV, replace gs with rs)
+gs.best_params_
+
+# ROC-AUC score for the best model (for RandomizedSearchCV, replace gs with rs)
+gs.best_score_
