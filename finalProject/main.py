@@ -335,7 +335,7 @@ params = [param0, param1, param2, param3, param4]
 
 
 # Applying GridSearchCV on the Logistic Regression model (JUST ONE MODEL) 
-gs = GridSearchCV(models[0], param0, cv=2, n_jobs=-1, scoring='roc_auc').fit(X_train, y_train)                                                      
+gs = GridSearchCV(models[0], param0, cv=2, n_jobs=-1, scoring='accuracy').fit(X_train, y_train)                                                      
 # Applying RandomizedSearch CV on the Logistic Regression model (JUST ONE MODEL) 
 rs = RandomizedSearchCV(models[0], param0, n_iter=100, n_jobs=-1, cv=2, scoring='accuracy').fit(X_train, y_train)   
 
