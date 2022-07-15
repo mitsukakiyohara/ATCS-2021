@@ -1,8 +1,11 @@
-# ATCS-2021
-ATCS repository from 2021-2022 (B Block). 
+# ATCS (2021-2022)
+Advanced Topics in CS repository from 2021-2022. <br> Main topics that were covered 
+this year included machine learning, data visualization, finite state machines, and more. <br>
+
 ## Projects completed: 
 ### 1. US Elections 2020 
 A data visualization project using Kaggle's US Election 2020 dataset. <br>
+Looked at to what extent Twitter sentiment could accurately predict the outcome of the 2020 Election. <br>
 Link to dataset: https://www.kaggle.com/manchunhui/us-election-2020-tweets
 
 ### 2. MazeBot
@@ -16,8 +19,7 @@ https://en.wikipedia.org/wiki/Minimax#Minimax_algorithm_with_alternate_moves <br
 https://en.wikipedia.org/wiki/Alpha%E2%80%93beta_pruning
 
 ### 4. Facial Recognition on Olivetti Dataset 
-Testing multiple ML models for facial recognition task on the <br>
-Olivetti Dataset <br>
+Testing multiple ML models for facial recognition task on the Olivetti Dataset <br>
 Link to dataset: https://scikit-learn.org/stable/modules/generated/sklearn.datasets.fetch_olivetti_faces.html
 
 
